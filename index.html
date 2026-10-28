@@ -46,8 +46,6 @@
   .photo-box .ph-icon{font-size:32px;color:var(--muted);margin-bottom:4px}
   .photo-box .ph-label{font-size:12px;color:var(--muted)}
   .photo-box .remove{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border:none;width:24px;height:24px;border-radius:50%;font-size:14px;cursor:pointer}
-
-  /* Herramientas de selección */
   .list-tools{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
   .tool-btn{flex:1;min-width:95px;padding:11px 8px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
   .tool-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
@@ -58,7 +56,6 @@
   .filters.show{display:block}
   .check-line{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:12px;color:var(--text)}
   .check-line input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
-
   .record{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
   .record:active{border-color:var(--accent)}
   .record.selected{border-color:var(--accent);background:#16281c}
@@ -75,8 +72,6 @@
   .empty{text-align:center;padding:40px 20px;color:var(--muted)}
   .empty-icon{font-size:48px;margin-bottom:10px}
   .fab{position:fixed;bottom:calc(20px + var(--safe-bottom));right:20px;width:60px;height:60px;border-radius:50%;background:var(--accent);color:#000;border:none;font-size:28px;font-weight:300;box-shadow:0 6px 20px rgba(74,222,128,.3);cursor:pointer;z-index:20}
-
-  /* Barra de selección múltiple */
   .select-bar{position:fixed;bottom:calc(14px + var(--safe-bottom));left:12px;right:12px;background:#111;border:1px solid var(--accent);border-radius:14px;padding:12px;display:none;align-items:center;gap:10px;z-index:40;box-shadow:0 -6px 30px rgba(0,0,0,.6)}
   .select-bar.show{display:flex}
   .select-count{font-size:14px;flex:1;font-weight:600}
@@ -85,7 +80,6 @@
   .gen-pdf{background:var(--accent);color:#000}
   .gen-pdf:disabled{opacity:.4}
   .cancel-sel{background:var(--card2);color:var(--text)}
-
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
   .modal.show{display:flex}
   .modal-content{background:var(--card);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
@@ -111,6 +105,7 @@
   .install-banner-text strong{color:var(--accent)}
   .install-btn{background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px}
   .install-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+  #otherMachineBox{display:none;margin-top:-8px;margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -172,7 +167,16 @@
     </select>
 
     <label>Máquina / Equipo</label>
-    <input type="text" id="fMachine" placeholder="Ej: Envasadora 3, Llenadora A..." autocomplete="off">
+    <select id="fMachine" onchange="handleMachineChange()">
+      <option value="">-- Selecciona máquina --</option>
+      <option>KRONES</option>
+      <option>SBO12</option>
+      <option>SBO4</option>
+      <option>SBO4SUP</option>
+      <option>SBO12ITA</option>
+      <option value="__OTHER__">Otra...</option>
+    </select>
+    <input type="text" id="otherMachine" placeholder="Escribe el nombre de la máquina..." style="display:none">
 
     <div class="row">
       <div><label>Fecha</label><input type="date" id="fDate"></div>
@@ -214,7 +218,7 @@
 </div>
 
 <div class="install-banner" id="installBanner">
-  <div class="install-banner-text">📲 <strong>Instalar como app</strong><br><span style="font-size:12px;color:var(--muted)">Acceso directo en el escritorio</span></div>
+  <div class="install-banner-text"> <strong>Instalar como app</strong><br><span style="font-size:12px;color:var(--muted)">Acceso directo en el escritorio</span></div>
   <button class="install-btn" onclick="installApp()">Instalar</button>
   <button class="install-close" onclick="document.getElementById('installBanner').classList.remove('show')">×</button>
 </div>
@@ -227,6 +231,44 @@ let records = JSON.parse(localStorage.getItem('caiba_records') || '[]');
 let currentPhotos = {before:null, after:null};
 let editingId = null;
 let deferredPrompt = null;
+
+// ===== MÁQUINA: OTRA =====
+function handleMachineChange(){
+  const sel = document.getElementById('fMachine');
+  const other = document.getElementById('otherMachine');
+  if(sel.value === '__OTHER__'){
+    other.style.display = 'block';
+    other.focus();
+  } else {
+    other.style.display = 'none';
+    other.value = '';
+  }
+}
+
+function getMachineValue(){
+  const sel = document.getElementById('fMachine');
+  if(sel.value === '__OTHER__') return document.getElementById('otherMachine').value.trim();
+  return sel.value;
+}
+
+function setMachineValue(val){
+  const sel = document.getElementById('fMachine');
+  const other = document.getElementById('otherMachine');
+  const options = Array.from(sel.options).map(o=>o.value);
+  if(options.includes(val)){
+    sel.value = val;
+    other.style.display = 'none';
+    other.value = '';
+  } else if(val){
+    sel.value = '__OTHER__';
+    other.style.display = 'block';
+    other.value = val;
+  } else {
+    sel.value = '';
+    other.style.display = 'none';
+    other.value = '';
+  }
+}
 
 // ===== SELECCIÓN =====
 let selectMode = false;
@@ -349,14 +391,14 @@ function openForm(id=null){
   if(id){
     const r=records.find(x=>x.id===id);
     document.getElementById('fType').value=r.type;
-    document.getElementById('fMachine').value=r.machine;
+    setMachineValue(r.machine);
     document.getElementById('fDate').value=r.date;
     document.getElementById('fShift').value=r.shift;
     document.getElementById('fNotes').value=r.notes||'';
     currentPhotos={before:r.photoBefore,after:r.photoAfter};
   } else {
     document.getElementById('fType').value='Mantenimiento';
-    document.getElementById('fMachine').value='';
+    setMachineValue('');
     document.getElementById('fDate').value=localISO(new Date());
     document.getElementById('fShift').value='Mañana';
     document.getElementById('fNotes').value='';
@@ -393,8 +435,8 @@ function renderPhotoBoxes(){
 function removePhoto(w){ currentPhotos[w]=null; renderPhotoBoxes(); }
 
 function saveRecord(){
-  const machine=document.getElementById('fMachine').value.trim();
-  if(!machine){toast('⚠️ Indica la máquina');return;}
+  const machine = getMachineValue();
+  if(!machine){toast('⚠️ Selecciona o escribe la máquina');return;}
   const data={
     id:editingId||Date.now(),
     type:document.getElementById('fType').value,
@@ -431,7 +473,7 @@ function renderList(filter=''){
         <span class="record-date">${formatDate(r.date)}</span>
       </div>
       <div class="record-machine">${escapeHtml(r.machine)}</div>
-      <div class="record-shift">Turno ${r.shift} ${r.photoBefore||r.photoAfter?'· 📷':''}</div>
+      <div class="record-shift">Turno ${r.shift} ${r.photoBefore||r.photoAfter?'· ':''}</div>
     </div>`).join('');
 }
 function formatDate(d){ if(!d)return''; const[y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
@@ -450,10 +492,10 @@ function showDetail(id){
     <div class="detail-row"><span class="detail-label">Equipo</span><span class="detail-value">Equipo 5</span></div>
     ${r.notes?`<div class="detail-row" style="flex-direction:column"><span class="detail-label">Incidencias</span><span class="detail-value" style="text-align:left;max-width:100%;margin-top:6px">${escapeHtml(r.notes)}</span></div>`:''}
     ${photos}
-    <button class="btn btn-primary" onclick="exportSinglePDF(${r.id})">📄 Exportar PDF individual</button>
+    <button class="btn btn-primary" onclick="exportSinglePDF(${r.id})"> Exportar PDF individual</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-secondary" onclick="closeModal();openForm(${r.id})">✏️ Editar</button>
-      <button class="btn btn-danger" onclick="deleteRecord(${r.id})">🗑️ Borrar</button>
+      <button class="btn btn-danger" onclick="deleteRecord(${r.id})">️ Borrar</button>
     </div>`;
   document.getElementById('modalDetail').classList.add('show');
 }
@@ -465,9 +507,7 @@ function deleteRecord(id){
   closeModal(); updateSelectBar(); renderList(); toast('🗑️ Borrado');
 }
 
-// ============================================================
-// PDF EN FLUJO CONTINUO (varios trabajos por página)
-// ============================================================
+// ===== PDF =====
 function loadImg(dataUrl){
   return new Promise((resolve,reject)=>{
     const i=new Image(); i.onload=()=>resolve(i); i.onerror=reject; i.src=dataUrl;
@@ -485,53 +525,35 @@ async function buildPDF(list, filename){
   const doc=new jsPDF();
   const TOP=28, BOTTOM=277;
   let y=TOP;
-
   const newPage=()=>{doc.addPage(); y=TOP;};
   const ensure=(h)=>{if(y+h>BOTTOM) newPage();};
-
-  // Texto con saltos de página automáticos
   const flowText=(text,size,color)=>{
     doc.setFontSize(size); doc.setTextColor(...color); doc.setFont('helvetica','normal');
     const lines=doc.splitTextToSize(text,182);
-    for(const line of lines){
-      ensure(6);
-      doc.text(line,14,y);
-      y+=5.2;
-    }
+    for(const line of lines){ ensure(6); doc.text(line,14,y); y+=5.2; }
   };
 
   for(let idx=0; idx<list.length; idx++){
     const r=list[idx];
     ensure(34);
-
-    // --- Cabecera del trabajo ---
     doc.setFillColor(74,222,128); doc.rect(14,y-3.5,2.5,5,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20,20,20);
     const title=`${String(idx+1).padStart(2,'0')}. ${r.type.toUpperCase()}  -  ${formatDate(r.date)}`;
-    doc.text(title,20,y);
-    y+=7;
-
+    doc.text(title,20,y); y+=7;
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(70,70,70);
     const meta=`Maquina: ${r.machine}   |   Turno: ${r.shift}   |   Equipo 5`;
-    flowText(meta,10,[70,70,70]);
-    y+=2;
-
-    // --- Incidencias ---
+    flowText(meta,10,[70,70,70]); y+=2;
     if(r.notes){
       doc.setFontSize(8); doc.setTextColor(130,130,130);
       ensure(6); doc.text('INCIDENCIAS / OBSERVACIONES',14,y); y+=5;
-      flowText(r.notes,10,[40,40,40]);
-      y+=2;
+      flowText(r.notes,10,[40,40,40]); y+=2;
     }
-
-    // --- Fotografías (antes / después) ---
     if(r.photoBefore||r.photoAfter){
       const two=!!(r.photoBefore&&r.photoAfter);
       const boxW=two?88:120, boxH=two?62:82;
       ensure(boxH+14);
       doc.setFontSize(8); doc.setTextColor(130,130,130);
       doc.text('FOTOGRAFIAS',14,y); y+=4;
-
       try{
         if(two){
           if(r.photoBefore){const im=await loadImg(r.photoBefore);drawFitted(doc,im,14,y,boxW,boxH);}
@@ -547,15 +569,11 @@ async function buildPDF(list, filename){
         y+=boxH+4;
       }catch(e){console.warn('Error foto',e);y+=6;}
     }
-
-    // --- Separador entre trabajos ---
     ensure(10);
     doc.setDrawColor(220,220,220); doc.setLineWidth(0.3);
-    doc.line(14,y+2,196,y+2);
-    y+=9;
+    doc.line(14,y+2,196,y+2); y+=9;
   }
 
-  // --- Cabecera y pie en TODAS las páginas ---
   const pages=doc.internal.getNumberOfPages();
   for(let i=1;i<=pages;i++){
     doc.setPage(i);
@@ -564,16 +582,13 @@ async function buildPDF(list, filename){
     doc.text('CAIBA · Planta de Alcolea',14,12);
     doc.setTextColor(220,220,220); doc.setFont('helvetica','normal'); doc.setFontSize(10);
     doc.text('INFORME DE TRABAJOS · EQUIPO 5',196,12,{align:'right'});
-
     doc.setFontSize(8); doc.setTextColor(150,150,150);
     doc.text(`Generado: ${new Date().toLocaleString('es-ES')}   ·   ${list.length} trabajos`,14,290);
     doc.text(`Pagina ${i} de ${pages}`,196,290,{align:'right'});
   }
-
   doc.save(filename);
 }
 
-// PDF múltiple (selección)
 async function generateMultiplePDF(){
   if(!selectedIds.size){toast('Selecciona al menos un trabajo');return;}
   const list=records.filter(r=>selectedIds.has(r.id))
@@ -589,13 +604,10 @@ async function generateMultiplePDF(){
   finally{btn.disabled=false;btn.textContent='📄 Crear PDF';}
 }
 
-// PDF individual (se mantiene)
 async function exportSinglePDF(id){
   const r=records.find(x=>x.id===id); if(!r)return;
-  try{
-    await buildPDF([r],`CAIBA_Equipo5_${r.type}_${r.machine.replace(/\s+/g,'_')}_${r.date}.pdf`);
-    toast('📄 PDF generado');
-  }catch(e){toast('❌ Error al generar el PDF');}
+  try{ await buildPDF([r],`CAIBA_Equipo5_${r.type}_${r.machine.replace(/\s+/g,'_')}_${r.date}.pdf`); toast(' PDF generado'); }
+  catch(e){toast('❌ Error al generar el PDF');}
 }
 
 // ===== BACKUP =====
@@ -641,4 +653,3 @@ renderList();
 </script>
 </body>
 </html>
-<!-- forzar build -->
