@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CAIBA E5">
+<meta name="mobile-web-app-capable" content="yes">
+<title>CAIBA Alcolea · Equipo 5</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f0f0f'/><text x='50' y='68' font-size='48' text-anchor='middle' fill='%234ade80' font-family='Arial' font-weight='bold'>E5</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f0f0f'/><text x='50' y='68' font-size='48' text-anchor='middle' fill='%234ade80' font-family='Arial' font-weight='bold'>E5</text></svg>">
+
+<link rel="manifest" href='data:application/manifest+json,{"name":"CAIBA Equipo 5 - Planta Alcolea","short_name":"CAIBA E5","description":"Registro de trabajos de mantenimiento","start_url":"./","display":"standalone","orientation":"portrait","background_color":"%230f0f0f","theme_color":"%230f0f0f","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f0f0f%27/><text x=%2750%27 y=%2768%27 font-size=%2748%27 text-anchor=%27middle%27 fill=%27%234ade80%27 font-family=%27Arial%27 font-weight=%27bold%27>E5</text></svg>","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#0f0f0f;--card:#1a1a1a;--card2:#222;--border:#2a2a2a;
+    --text:#e8e8e8;--muted:#888;--accent:#4ade80;--danger:#ef4444;
+    --safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;min-height:100vh;min-height:100dvh;overscroll-behavior:none}
+  header{position:sticky;top:0;background:#000;padding:14px 16px;padding-top:calc(14px + var(--safe-top));border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;z-index:30}
+  header h1{font-size:16px;font-weight:600;letter-spacing:.3px}
+  header h1 span{color:var(--accent)}
+  .icon-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+  main{padding:16px;padding-bottom:calc(160px + var(--safe-bottom));max-width:720px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:14px;-webkit-appearance:none}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{min-height:90px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px}
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:var(--accent);color:#000}
+  .btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+  .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .photo-box{background:var(--card2);border:1px dashed var(--border);border-radius:10px;padding:12px;text-align:center;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
+  .photo-box img{width:100%;height:120px;object-fit:cover;border-radius:6px}
+  .photo-box .ph-icon{font-size:32px;color:var(--muted);margin-bottom:4px}
+  .photo-box .ph-label{font-size:12px;color:var(--muted)}
+  .photo-box .remove{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border:none;width:24px;height:24px;border-radius:50%;font-size:14px;cursor:pointer}
+
+  /* Herramientas de selección */
+  .list-tools{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .tool-btn{flex:1;min-width:95px;padding:11px 8px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+  .tool-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+  .quick-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{padding:7px 11px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:12px;cursor:pointer}
+  .chip:active{border-color:var(--accent);color:var(--accent)}
+  .filters{display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+  .filters.show{display:block}
+  .check-line{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:12px;color:var(--text)}
+  .check-line input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+
+  .record{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+  .record:active{border-color:var(--accent)}
+  .record.selected{border-color:var(--accent);background:#16281c}
+  .record-head{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .record-type{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .type-mantenimiento{background:#1e3a8a33;color:#60a5fa}
+  .type-limpieza{background:#16653433;color:#4ade80}
+  .type-reparacion{background:#7c2d1233;color:#fb923c}
+  .record-date{font-size:12px;color:var(--muted);margin-left:auto}
+  .record-machine{font-size:15px;font-weight:600;margin:4px 0}
+  .record-shift{font-size:13px;color:var(--muted)}
+  .checkbox{width:22px;height:22px;min-width:22px;border:2px solid #555;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000}
+  .record.selected .checkbox{background:var(--accent);border-color:var(--accent)}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .empty-icon{font-size:48px;margin-bottom:10px}
+  .fab{position:fixed;bottom:calc(20px + var(--safe-bottom));right:20px;width:60px;height:60px;border-radius:50%;background:var(--accent);color:#000;border:none;font-size:28px;font-weight:300;box-shadow:0 6px 20px rgba(74,222,128,.3);cursor:pointer;z-index:20}
+
+  /* Barra de selección múltiple */
+  .select-bar{position:fixed;bottom:calc(14px + var(--safe-bottom));left:12px;right:12px;background:#111;border:1px solid var(--accent);border-radius:14px;padding:12px;display:none;align-items:center;gap:10px;z-index:40;box-shadow:0 -6px 30px rgba(0,0,0,.6)}
+  .select-bar.show{display:flex}
+  .select-count{font-size:14px;flex:1;font-weight:600}
+  .select-count span{color:var(--accent)}
+  .select-bar button{border:none;border-radius:9px;padding:11px 13px;font-size:13px;font-weight:700;cursor:pointer}
+  .gen-pdf{background:var(--accent);color:#000}
+  .gen-pdf:disabled{opacity:.4}
+  .cancel-sel{background:var(--card2);color:var(--text)}
+
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+  .modal.show{display:flex}
+  .modal-content{background:var(--card);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .modal-head h2{font-size:17px}
+  .close-btn{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+  .detail-photos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  .detail-photos img{width:100%;height:120px;object-fit:cover;border-radius:8px}
+  .detail-row{padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px}
+  .detail-label{color:var(--muted);font-size:13px}
+  .detail-value{font-weight:500;text-align:right;max-width:60%;word-break:break-word}
+  .toast{position:fixed;bottom:calc(110px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border);padding:12px 20px;border-radius:10px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  .view{display:none}
+  .view.active{display:block}
+  .search{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;width:100%;color:var(--text);font-size:14px}
+  .menu{position:absolute;top:calc(56px + var(--safe-top));right:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;display:none;z-index:50;min-width:220px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .menu.show{display:block}
+  .menu-item{padding:10px 12px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:10px}
+  .install-banner{position:fixed;bottom:calc(100px + var(--safe-bottom));left:16px;right:16px;background:var(--card);border:1px solid var(--accent);border-radius:12px;padding:14px;display:none;align-items:center;gap:12px;z-index:45}
+  .install-banner.show{display:flex}
+  .install-banner-text{flex:1;font-size:14px}
+  .install-banner-text strong{color:var(--accent)}
+  .install-btn{background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px}
+  .install-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CAIBA <span>· Alcolea · Equipo 5</span></h1>
+  <button class="icon-btn" onclick="toggleMenu()">☰</button>
+  <div class="menu" id="menu">
+    <div class="menu-item" onclick="exportBackup()">💾 Copia de seguridad</div>
+    <div class="menu-item" onclick="document.getElementById('importFile').click()">📥 Restaurar copia</div>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+    <div class="menu-item" onclick="confirmClearAll()">🗑️ Borrar todo</div>
+    <div class="menu-item" onclick="showAbout()">ℹ️ Acerca de</div>
+  </div>
+</header>
+
+<main>
+
+<!-- LISTA -->
+<div class="view active" id="viewList">
+  <input type="text" class="search" id="searchInput" placeholder="🔍 Buscar por máquina, fecha, turno..." oninput="renderList(this.value)">
+
+  <div class="list-tools">
+    <button class="tool-btn" id="selectModeBtn" onclick="toggleSelectMode()">☑️ Seleccionar</button>
+    <button class="tool-btn" onclick="toggleFilters()">⚙️ Filtros rápidos</button>
+  </div>
+
+  <div class="filters" id="filtersPanel">
+    <label>Seleccionar trabajos de...</label>
+    <select id="filterMachine"><option value="">Todas las máquinas</option></select>
+    <select id="filterShift">
+      <option value="">Todos los turnos</option>
+      <option>Mañana</option><option>Tarde</option><option>Noche</option>
+    </select>
+    <select id="filterType">
+      <option value="">Todos los tipos</option>
+      <option>Mantenimiento</option><option>Limpieza</option><option>Reparación</option>
+    </select>
+    <label class="check-line"><input type="checkbox" id="filterWeek"> Solo esta semana</label>
+    <button class="btn btn-primary" onclick="selectByFilters()">✅ Seleccionar coincidentes</button>
+    <div class="quick-row">
+      <button class="chip" onclick="selectAllVisible()">Seleccionar todos</button>
+      <button class="chip" onclick="clearSelection()">Ninguno</button>
+      <button class="chip" onclick="selectWeekOnly()">Solo esta semana</button>
+    </div>
+  </div>
+
+  <div id="recordsList"></div>
+</div>
+
+<!-- FORMULARIO -->
+<div class="view" id="viewForm">
+  <div class="card">
+    <label>Tipo de trabajo</label>
+    <select id="fType">
+      <option value="Mantenimiento">Mantenimiento</option>
+      <option value="Limpieza">Limpieza</option>
+      <option value="Reparación">Reparación</option>
+    </select>
+
+    <label>Máquina / Equipo</label>
+    <input type="text" id="fMachine" placeholder="Ej: Envasadora 3, Llenadora A..." autocomplete="off">
+
+    <div class="row">
+      <div><label>Fecha</label><input type="date" id="fDate"></div>
+      <div>
+        <label>Turno</label>
+        <select id="fShift"><option>Mañana</option><option>Tarde</option><option>Noche</option></select>
+      </div>
+    </div>
+
+    <label>Incidencias / Observaciones</label>
+    <textarea id="fNotes" placeholder="Describe el trabajo realizado, anomalías..."></textarea>
+
+    <label>Fotografías</label>
+    <div class="photo-grid">
+      <div class="photo-box" onclick="document.getElementById('photoBefore').click()" id="boxBefore">
+        <div class="ph-icon">📷</div><div class="ph-label">ANTES</div>
+      </div>
+      <div class="photo-box" onclick="document.getElementById('photoAfter').click()" id="boxAfter">
+        <div class="ph-icon">📷</div><div class="ph-label">DESPUÉS</div>
+      </div>
+    </div>
+    <input type="file" id="photoBefore" accept="image/*" capture="environment" style="display:none" onchange="loadPhoto(event,'before')">
+    <input type="file" id="photoAfter" accept="image/*" capture="environment" style="display:none" onchange="loadPhoto(event,'after')">
+
+    <button class="btn btn-primary" onclick="saveRecord()">💾 Guardar trabajo</button>
+    <button class="btn btn-secondary" onclick="showView('viewList')">Cancelar</button>
+  </div>
+</div>
+
+</main>
+
+<button class="fab" id="fab" onclick="openForm()">+</button>
+
+<!-- Barra selección múltiple -->
+<div class="select-bar" id="selectBar">
+  <div class="select-count"><span id="selCount">0</span> seleccionados</div>
+  <button class="cancel-sel" onclick="toggleSelectMode()">Cancelar</button>
+  <button class="gen-pdf" id="genPdfBtn" onclick="generateMultiplePDF()">📄 Crear PDF</button>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-text">📲 <strong>Instalar como app</strong><br><span style="font-size:12px;color:var(--muted)">Acceso directo en el escritorio</span></div>
+  <button class="install-btn" onclick="installApp()">Instalar</button>
+  <button class="install-close" onclick="document.getElementById('installBanner').classList.remove('show')">×</button>
+</div>
+
+<div class="modal" id="modalDetail"><div class="modal-content" id="detailContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+let records = JSON.parse(localStorage.getItem('caiba_records') || '[]');
+let currentPhotos = {before:null, after:null};
+let editingId = null;
+let deferredPrompt = null;
+
+// ===== SELECCIÓN =====
+let selectMode = false;
+let selectedIds = new Set();
+
+function toggleSelectMode(){
+  selectMode = !selectMode;
+  selectedIds.clear();
+  document.getElementById('selectModeBtn').classList.toggle('active', selectMode);
+  document.getElementById('selectModeBtn').textContent = selectMode ? '✅ Modo selección' : '☑️ Seleccionar';
+  updateSelectBar();
+  renderList(document.getElementById('searchInput').value);
+}
+
+function updateSelectBar(){
+  document.getElementById('selectBar').classList.toggle('show', selectMode);
+  document.getElementById('selCount').textContent = selectedIds.size;
+  document.getElementById('genPdfBtn').disabled = selectedIds.size === 0;
+  document.getElementById('fab').style.display = (selectMode || document.getElementById('viewForm').classList.contains('active')) ? 'none' : 'block';
+}
+
+function toggleSelection(id){
+  if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+  updateSelectBar();
+  renderList(document.getElementById('searchInput').value);
+}
+
+function clearSelection(){ selectedIds.clear(); updateSelectBar(); renderList(document.getElementById('searchInput').value); }
+
+function selectAllVisible(){
+  getFiltered().forEach(r=>selectedIds.add(r.id));
+  updateSelectBar(); renderList(document.getElementById('searchInput').value);
+  toast('✅ Trabajos visibles seleccionados');
+}
+
+function weekDates(){
+  const now = new Date();
+  const day = (now.getDay()+6)%7;
+  const mon = new Date(now); mon.setDate(now.getDate()-day); mon.setHours(0,0,0,0);
+  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+  return {from:localISO(mon), to:localISO(sun)};
+}
+function localISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function selectWeekOnly(){
+  const w = weekDates();
+  records.filter(r=>r.date>=w.from && r.date<=w.to).forEach(r=>selectedIds.add(r.id));
+  updateSelectBar(); renderList(document.getElementById('searchInput').value);
+  toast('✅ Trabajos de esta semana seleccionados');
+}
+
+function toggleFilters(){
+  const p = document.getElementById('filtersPanel');
+  p.classList.toggle('show');
+  if(p.classList.contains('show')) fillMachineFilter();
+}
+
+function fillMachineFilter(){
+  const sel = document.getElementById('filterMachine');
+  const machines = [...new Set(records.map(r=>r.machine))].sort();
+  sel.innerHTML = '<option value="">Todas las máquinas</option>' + machines.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+}
+
+function selectByFilters(){
+  const m = document.getElementById('filterMachine').value;
+  const s = document.getElementById('filterShift').value;
+  const t = document.getElementById('filterType').value;
+  const weekOnly = document.getElementById('filterWeek').checked;
+  const w = weekDates();
+  const match = records.filter(r =>
+    (!m || r.machine===m) && (!s || r.shift===s) && (!t || r.type===t) &&
+    (!weekOnly || (r.date>=w.from && r.date<=w.to))
+  );
+  if(match.length===0){ toast('No hay trabajos que coincidan'); return; }
+  match.forEach(r=>selectedIds.add(r.id));
+  if(!selectMode) toggleSelectMode();
+  updateSelectBar(); renderList(document.getElementById('searchInput').value);
+  toast(`✅ ${match.length} trabajos seleccionados`);
+}
+
+// ===== PWA =====
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('installBanner').classList.add('show');
+});
+function installApp(){
+  if(!deferredPrompt){ toast('Menú ⋮ de Chrome → "Instalar aplicación"'); return; }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted') toast('✅ App instalada');
+    deferredPrompt=null;
+    document.getElementById('installBanner').classList.remove('show');
+  });
+}
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('installBanner').classList.remove('show');
+  toast('✅ App instalada en tu escritorio');
+});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW:',e));
+}
+
+// ===== NAVEGACIÓN =====
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id!=='viewList' && selectMode){ selectMode=false; selectedIds.clear();
+    document.getElementById('selectModeBtn').classList.remove('active');
+    document.getElementById('selectModeBtn').textContent='☑️ Seleccionar';
+  }
+  updateSelectBar();
+  window.scrollTo(0,0);
+}
+function toggleMenu(){ document.getElementById('menu').classList.toggle('show'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('header')) document.getElementById('menu').classList.remove('show'); });
+
+// ===== FORMULARIO =====
+function openForm(id=null){
+  editingId=id; currentPhotos={before:null,after:null};
+  if(id){
+    const r=records.find(x=>x.id===id);
+    document.getElementById('fType').value=r.type;
+    document.getElementById('fMachine').value=r.machine;
+    document.getElementById('fDate').value=r.date;
+    document.getElementById('fShift').value=r.shift;
+    document.getElementById('fNotes').value=r.notes||'';
+    currentPhotos={before:r.photoBefore,after:r.photoAfter};
+  } else {
+    document.getElementById('fType').value='Mantenimiento';
+    document.getElementById('fMachine').value='';
+    document.getElementById('fDate').value=localISO(new Date());
+    document.getElementById('fShift').value='Mañana';
+    document.getElementById('fNotes').value='';
+  }
+  renderPhotoBoxes(); showView('viewForm');
+}
+
+function loadPhoto(e,which){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas'); const maxW=1200;
+      let w=img.width,h=img.height;
+      if(w>maxW){h=h*maxW/w;w=maxW;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      currentPhotos[which]=canvas.toDataURL('image/jpeg',0.7);
+      renderPhotoBoxes();
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file); e.target.value='';
+}
+function renderPhotoBoxes(){
+  ['before','after'].forEach(w=>{
+    const box=document.getElementById(w==='before'?'boxBefore':'boxAfter');
+    box.innerHTML=currentPhotos[w]
+      ? `<img src="${currentPhotos[w]}"><button class="remove" onclick="event.stopPropagation();removePhoto('${w}')">×</button>`
+      : `<div class="ph-icon">📷</div><div class="ph-label">${w==='before'?'ANTES':'DESPUÉS'}</div>`;
+  });
+}
+function removePhoto(w){ currentPhotos[w]=null; renderPhotoBoxes(); }
+
+function saveRecord(){
+  const machine=document.getElementById('fMachine').value.trim();
+  if(!machine){toast('⚠️ Indica la máquina');return;}
+  const data={
+    id:editingId||Date.now(),
+    type:document.getElementById('fType').value,
+    machine,
+    date:document.getElementById('fDate').value,
+    shift:document.getElementById('fShift').value,
+    notes:document.getElementById('fNotes').value.trim(),
+    photoBefore:currentPhotos.before, photoAfter:currentPhotos.after,
+    createdAt:editingId?records.find(r=>r.id===editingId).createdAt:new Date().toISOString()
+  };
+  records = editingId ? records.map(r=>r.id===editingId?data:r) : [data,...records];
+  localStorage.setItem('caiba_records',JSON.stringify(records));
+  toast('✅ Guardado'); showView('viewList'); renderList();
+}
+
+// ===== LISTA =====
+function getFiltered(){
+  const f=document.getElementById('searchInput').value.toLowerCase();
+  return records.filter(r=>!f || r.machine.toLowerCase().includes(f) || r.date.includes(f) ||
+    r.shift.toLowerCase().includes(f) || r.type.toLowerCase().includes(f) || (r.notes||'').toLowerCase().includes(f));
+}
+function renderList(filter=''){
+  const list=document.getElementById('recordsList');
+  const filtered=getFiltered();
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">📋</div>${records.length===0?'No hay trabajos registrados<br><span style="font-size:13px">Pulsa + para añadir uno</span>':'Sin resultados'}</div>`;
+    return;
+  }
+  list.innerHTML=filtered.map(r=>`
+    <div class="record ${selectedIds.has(r.id)?'selected':''}" onclick="${selectMode?`toggleSelection(${r.id})`:`showDetail(${r.id})`}">
+      <div class="record-head">
+        ${selectMode?`<div class="checkbox">${selectedIds.has(r.id)?'✓':''}</div>`:''}
+        <span class="record-type type-${r.type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}">${r.type}</span>
+        <span class="record-date">${formatDate(r.date)}</span>
+      </div>
+      <div class="record-machine">${escapeHtml(r.machine)}</div>
+      <div class="record-shift">Turno ${r.shift} ${r.photoBefore||r.photoAfter?'· 📷':''}</div>
+    </div>`).join('');
+}
+function formatDate(d){ if(!d)return''; const[y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+function escapeHtml(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ===== DETALLE =====
+function showDetail(id){
+  const r=records.find(x=>x.id===id); if(!r)return;
+  const photos=(r.photoBefore||r.photoAfter)?`<div class="detail-photos">${r.photoBefore?`<img src="${r.photoBefore}">`:''}${r.photoAfter?`<img src="${r.photoAfter}">`:''}</div>`:'';
+  document.getElementById('detailContent').innerHTML=`
+    <div class="modal-head"><h2>Trabajo #${String(r.id).slice(-4)}</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+    <span class="record-type type-${r.type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}" style="margin-bottom:12px;display:inline-block">${r.type}</span>
+    <div class="detail-row"><span class="detail-label">Máquina</span><span class="detail-value">${escapeHtml(r.machine)}</span></div>
+    <div class="detail-row"><span class="detail-label">Fecha</span><span class="detail-value">${formatDate(r.date)}</span></div>
+    <div class="detail-row"><span class="detail-label">Turno</span><span class="detail-value">${r.shift}</span></div>
+    <div class="detail-row"><span class="detail-label">Equipo</span><span class="detail-value">Equipo 5</span></div>
+    ${r.notes?`<div class="detail-row" style="flex-direction:column"><span class="detail-label">Incidencias</span><span class="detail-value" style="text-align:left;max-width:100%;margin-top:6px">${escapeHtml(r.notes)}</span></div>`:''}
+    ${photos}
+    <button class="btn btn-primary" onclick="exportSinglePDF(${r.id})">📄 Exportar PDF individual</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-secondary" onclick="closeModal();openForm(${r.id})">✏️ Editar</button>
+      <button class="btn btn-danger" onclick="deleteRecord(${r.id})">🗑️ Borrar</button>
+    </div>`;
+  document.getElementById('modalDetail').classList.add('show');
+}
+function closeModal(){document.getElementById('modalDetail').classList.remove('show');}
+function deleteRecord(id){
+  if(!confirm('¿Borrar este trabajo?'))return;
+  records=records.filter(r=>r.id!==id); selectedIds.delete(id);
+  localStorage.setItem('caiba_records',JSON.stringify(records));
+  closeModal(); updateSelectBar(); renderList(); toast('🗑️ Borrado');
+}
+
+// ============================================================
+// PDF EN FLUJO CONTINUO (varios trabajos por página)
+// ============================================================
+function loadImg(dataUrl){
+  return new Promise((resolve,reject)=>{
+    const i=new Image(); i.onload=()=>resolve(i); i.onerror=reject; i.src=dataUrl;
+  });
+}
+function drawFitted(doc,img,x,y,w,h){
+  const scale=Math.min(w/img.width,h/img.height);
+  const dw=img.width*scale, dh=img.height*scale;
+  doc.setFillColor(235,235,235); doc.rect(x,y,w,h,'F');
+  doc.addImage(img.src,'JPEG',x+(w-dw)/2,y+(h-dh)/2,dw,dh);
+}
+
+async function buildPDF(list, filename){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const TOP=28, BOTTOM=277;
+  let y=TOP;
+
+  const newPage=()=>{doc.addPage(); y=TOP;};
+  const ensure=(h)=>{if(y+h>BOTTOM) newPage();};
+
+  // Texto con saltos de página automáticos
+  const flowText=(text,size,color)=>{
+    doc.setFontSize(size); doc.setTextColor(...color); doc.setFont('helvetica','normal');
+    const lines=doc.splitTextToSize(text,182);
+    for(const line of lines){
+      ensure(6);
+      doc.text(line,14,y);
+      y+=5.2;
+    }
+  };
+
+  for(let idx=0; idx<list.length; idx++){
+    const r=list[idx];
+    ensure(34);
+
+    // --- Cabecera del trabajo ---
+    doc.setFillColor(74,222,128); doc.rect(14,y-3.5,2.5,5,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20,20,20);
+    const title=`${String(idx+1).padStart(2,'0')}. ${r.type.toUpperCase()}  -  ${formatDate(r.date)}`;
+    doc.text(title,20,y);
+    y+=7;
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(70,70,70);
+    const meta=`Maquina: ${r.machine}   |   Turno: ${r.shift}   |   Equipo 5`;
+    flowText(meta,10,[70,70,70]);
+    y+=2;
+
+    // --- Incidencias ---
+    if(r.notes){
+      doc.setFontSize(8); doc.setTextColor(130,130,130);
+      ensure(6); doc.text('INCIDENCIAS / OBSERVACIONES',14,y); y+=5;
+      flowText(r.notes,10,[40,40,40]);
+      y+=2;
+    }
+
+    // --- Fotografías (antes / después) ---
+    if(r.photoBefore||r.photoAfter){
+      const two=!!(r.photoBefore&&r.photoAfter);
+      const boxW=two?88:120, boxH=two?62:82;
+      ensure(boxH+14);
+      doc.setFontSize(8); doc.setTextColor(130,130,130);
+      doc.text('FOTOGRAFIAS',14,y); y+=4;
+
+      try{
+        if(two){
+          if(r.photoBefore){const im=await loadImg(r.photoBefore);drawFitted(doc,im,14,y,boxW,boxH);}
+          if(r.photoAfter){const im=await loadImg(r.photoAfter);drawFitted(doc,im,108,y,boxW,boxH);}
+          doc.setFontSize(8);doc.setTextColor(100,100,100);
+          doc.text('ANTES',14,y-1);doc.text('DESPUES',108,y-1);
+        } else {
+          const im=await loadImg(r.photoBefore||r.photoAfter);
+          drawFitted(doc,im,14,y,boxW,boxH);
+          doc.setFontSize(8);doc.setTextColor(100,100,100);
+          doc.text(r.photoBefore?'ANTES':'DESPUES',14,y-1);
+        }
+        y+=boxH+4;
+      }catch(e){console.warn('Error foto',e);y+=6;}
+    }
+
+    // --- Separador entre trabajos ---
+    ensure(10);
+    doc.setDrawColor(220,220,220); doc.setLineWidth(0.3);
+    doc.line(14,y+2,196,y+2);
+    y+=9;
+  }
+
+  // --- Cabecera y pie en TODAS las páginas ---
+  const pages=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setFillColor(15,15,15); doc.rect(0,0,210,19,'F');
+    doc.setTextColor(74,222,128); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text('CAIBA · Planta de Alcolea',14,12);
+    doc.setTextColor(220,220,220); doc.setFont('helvetica','normal'); doc.setFontSize(10);
+    doc.text('INFORME DE TRABAJOS · EQUIPO 5',196,12,{align:'right'});
+
+    doc.setFontSize(8); doc.setTextColor(150,150,150);
+    doc.text(`Generado: ${new Date().toLocaleString('es-ES')}   ·   ${list.length} trabajos`,14,290);
+    doc.text(`Pagina ${i} de ${pages}`,196,290,{align:'right'});
+  }
+
+  doc.save(filename);
+}
+
+// PDF múltiple (selección)
+async function generateMultiplePDF(){
+  if(!selectedIds.size){toast('Selecciona al menos un trabajo');return;}
+  const list=records.filter(r=>selectedIds.has(r.id))
+    .sort((a,b)=>(a.date+(a.createdAt||'')).localeCompare(b.date+(b.createdAt||'')));
+  const btn=document.getElementById('genPdfBtn');
+  btn.disabled=true; btn.textContent='⏳ Generando...';
+  try{
+    const first=list[0].date, last=list[list.length-1].date;
+    const name=`CAIBA_Equipo5_Informe_${first}_a_${last}.pdf`;
+    await buildPDF(list,name);
+    toast(`✅ PDF creado: ${list.length} trabajos`);
+  }catch(e){console.error(e);toast('❌ Error al generar el PDF');}
+  finally{btn.disabled=false;btn.textContent='📄 Crear PDF';}
+}
+
+// PDF individual (se mantiene)
+async function exportSinglePDF(id){
+  const r=records.find(x=>x.id===id); if(!r)return;
+  try{
+    await buildPDF([r],`CAIBA_Equipo5_${r.type}_${r.machine.replace(/\s+/g,'_')}_${r.date}.pdf`);
+    toast('📄 PDF generado');
+  }catch(e){toast('❌ Error al generar el PDF');}
+}
+
+// ===== BACKUP =====
+function exportBackup(){
+  const data={app:'CAIBA Alcolea - Equipo 5',version:3,exportedAt:new Date().toISOString(),records};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=`CAIBA_backup_${localISO(new Date())}.json`; a.click();
+  URL.revokeObjectURL(url); toast('💾 Copia descargada');
+}
+function importBackup(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.records)throw new Error('Formato invalido');
+      if(!confirm(`Se importarán ${data.records.length} trabajos. ¿AÑADIR a los actuales?`))return;
+      const ids=new Set(records.map(r=>r.id));
+      const fresh=data.records.filter(r=>!ids.has(r.id));
+      records=[...fresh,...records];
+      localStorage.setItem('caiba_records',JSON.stringify(records));
+      renderList(); fillMachineFilter();
+      toast(`✅ ${fresh.length} trabajos importados`);
+    }catch(err){toast('❌ Archivo no válido');}
+  };
+  reader.readAsText(file); e.target.value='';
+}
+function confirmClearAll(){
+  if(!confirm('⚠️ ¿Borrar TODOS los trabajos?'))return;
+  if(!confirm('¿Seguro? Haz antes una copia de seguridad.'))return;
+  records=[];selectedIds.clear();
+  localStorage.setItem('caiba_records',JSON.stringify(records));
+  updateSelectBar();renderList();toast('🗑️ Todo borrado');
+}
+function showAbout(){alert('CAIBA Alcolea · Equipo 5\nVersión 3.0 - PWA\n\nInforme múltiple: selecciona varios trabajos y genera un único PDF.\nDesarrollado para uso interno.');}
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+renderList();
+</script>
+</body>
+</html>
