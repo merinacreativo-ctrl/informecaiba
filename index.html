@@ -109,7 +109,6 @@
   .install-banner-text strong{color:var(--accent)}
   .install-btn{background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px}
   .install-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
-  #otherMachineBox{display:none;margin-top:-8px;margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -121,14 +120,13 @@
     <div class="menu-item" onclick="exportBackup()">💾 Copia de seguridad</div>
     <div class="menu-item" onclick="document.getElementById('importFile').click()">📥 Restaurar copia</div>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
-    <div class="menu-item" onclick="confirmClearAll()">️ Borrar todo</div>
-    <div class="menu-item" onclick="showAbout()">️ Acerca de</div>
+    <div class="menu-item" onclick="confirmClearAll()">🗑️ Borrar todo</div>
+    <div class="menu-item" onclick="showAbout()">ℹ️ Acerca de</div>
   </div>
 </header>
 
 <main>
 
-<!-- LISTA -->
 <div class="view active" id="viewList">
   <input type="text" class="search" id="searchInput" placeholder="🔍 Buscar por máquina, fecha, turno..." oninput="renderList(this.value)">
 
@@ -160,7 +158,6 @@
   <div id="recordsList"></div>
 </div>
 
-<!-- FORMULARIO -->
 <div class="view" id="viewForm">
   <div class="card">
     <label>Tipo de trabajo</label>
@@ -224,7 +221,6 @@
 
 <button class="fab" id="fab" onclick="openForm()">+</button>
 
-<!-- Barra selección múltiple -->
 <div class="select-bar" id="selectBar">
   <div class="select-count"><span id="selCount">0</span> seleccionados</div>
   <button class="cancel-sel" onclick="toggleSelectMode()">Cancelar</button>
@@ -246,7 +242,6 @@ let currentPhotos = {before:[], after:[]};
 let editingId = null;
 let deferredPrompt = null;
 
-// ===== MÁQUINA: OTRA =====
 function handleMachineChange(){
   const sel = document.getElementById('fMachine');
   const other = document.getElementById('otherMachine');
@@ -284,7 +279,6 @@ function setMachineValue(val){
   }
 }
 
-// ===== SELECCIÓN =====
 let selectMode = false;
 let selectedIds = new Set();
 
@@ -363,7 +357,6 @@ function selectByFilters(){
   toast(`✅ ${match.length} trabajos seleccionados`);
 }
 
-// ===== PWA =====
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); deferredPrompt=e;
   document.getElementById('installBanner').classList.add('show');
@@ -385,7 +378,6 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW:',e));
 }
 
-// ===== NAVEGACIÓN =====
 function showView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -399,7 +391,6 @@ function showView(id){
 function toggleMenu(){ document.getElementById('menu').classList.toggle('show'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('header')) document.getElementById('menu').classList.remove('show'); });
 
-// ===== FORMULARIO =====
 function openForm(id=null){
   editingId=id; currentPhotos={before:[],after:[]};
   if(id){
@@ -409,7 +400,6 @@ function openForm(id=null){
     document.getElementById('fDate').value=r.date;
     document.getElementById('fShift').value=r.shift;
     document.getElementById('fNotes').value=r.notes||'';
-    // Compatibilidad: si es string antiguo, convertir a array
     currentPhotos.before = Array.isArray(r.photoBefore) ? r.photoBefore : (r.photoBefore ? [r.photoBefore] : []);
     currentPhotos.after = Array.isArray(r.photoAfter) ? r.photoAfter : (r.photoAfter ? [r.photoAfter] : []);
   } else {
@@ -483,7 +473,6 @@ function saveRecord(){
   toast('✅ Guardado'); showView('viewList'); renderList();
 }
 
-// ===== LISTA =====
 function getFiltered(){
   const f=document.getElementById('searchInput').value.toLowerCase();
   return records.filter(r=>!f || r.machine.toLowerCase().includes(f) || r.date.includes(f) ||
@@ -513,7 +502,6 @@ function renderList(filter=''){
 function formatDate(d){ if(!d)return''; const[y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
 function escapeHtml(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-// ===== DETALLE =====
 function showDetail(id){
   const r=records.find(x=>x.id===id); if(!r)return;
   const photosBefore = Array.isArray(r.photoBefore) ? r.photoBefore : (r.photoBefore ? [r.photoBefore] : []);
@@ -545,7 +533,6 @@ function deleteRecord(id){
   closeModal(); updateSelectBar(); renderList(); toast('🗑️ Borrado');
 }
 
-// ===== PDF =====
 function loadImg(dataUrl){
   return new Promise((resolve,reject)=>{
     const i=new Image(); i.onload=()=>resolve(i); i.onerror=reject; i.src=dataUrl;
@@ -587,45 +574,60 @@ async function buildPDF(list, filename){
       flowText(r.notes,10,[40,40,40]); y+=2;
     }
     
-    // Fotos: antes y después
     const photosBefore = Array.isArray(r.photoBefore) ? r.photoBefore : (r.photoBefore ? [r.photoBefore] : []);
     const photosAfter = Array.isArray(r.photoAfter) ? r.photoAfter : (r.photoAfter ? [r.photoAfter] : []);
     
     if(photosBefore.length > 0 || photosAfter.length > 0){
       const boxW = 88, boxH = 62;
+      const cols = 2;
+      const rowH = boxH + 10;
       
       if(photosBefore.length > 0){
-        ensure(boxH + 14);
         doc.setFontSize(8); doc.setTextColor(130,130,130);
-        doc.text('ANTES',14,y); y+=4;
+        ensure(14); doc.text('ANTES',14,y); y+=4;
         
         for(let i=0; i<photosBefore.length; i++){
-          if(i > 0 && i % 2 === 0) ensure(boxH + 8);
-          const xPos = 14 + (i % 2) * 94;
-          if(i > 0 && i % 2 === 0) y += 4;
+          const row = Math.floor(i / cols);
+          const col = i % cols;
+          const xPos = 14 + col * 94;
+          
+          if(col === 0 && i > 0) ensure(rowH);
+          if(y + boxH > BOTTOM) newPage();
+          
           try{
             const im = await loadImg(photosBefore[i]);
             drawFitted(doc,im,xPos,y,boxW,boxH);
           }catch(e){console.warn('Error foto',e);}
+          
+          if(col === cols - 1 || i === photosBefore.length - 1){
+            y += rowH;
+          }
         }
-        y += boxH + 6;
+        y += 4;
       }
       
       if(photosAfter.length > 0){
-        ensure(boxH + 14);
         doc.setFontSize(8); doc.setTextColor(130,130,130);
-        doc.text('DESPUES',14,y); y+=4;
+        ensure(14); doc.text('DESPUES',14,y); y+=4;
         
         for(let i=0; i<photosAfter.length; i++){
-          if(i > 0 && i % 2 === 0) ensure(boxH + 8);
-          const xPos = 14 + (i % 2) * 94;
-          if(i > 0 && i % 2 === 0) y += 4;
+          const row = Math.floor(i / cols);
+          const col = i % cols;
+          const xPos = 14 + col * 94;
+          
+          if(col === 0 && i > 0) ensure(rowH);
+          if(y + boxH > BOTTOM) newPage();
+          
           try{
             const im = await loadImg(photosAfter[i]);
             drawFitted(doc,im,xPos,y,boxW,boxH);
           }catch(e){console.warn('Error foto',e);}
+          
+          if(col === cols - 1 || i === photosAfter.length - 1){
+            y += rowH;
+          }
         }
-        y += boxH + 6;
+        y += 4;
       }
     }
     
@@ -670,9 +672,8 @@ async function exportSinglePDF(id){
   catch(e){toast('❌ Error al generar el PDF');}
 }
 
-// ===== BACKUP =====
 function exportBackup(){
-  const data={app:'CAIBA Alcolea - Equipo 5',version:4,exportedAt:new Date().toISOString(),records};
+  const data={app:'CAIBA Alcolea - Equipo 5',version:5,exportedAt:new Date().toISOString(),records};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob), a=document.createElement('a');
   a.href=url; a.download=`CAIBA_backup_${localISO(new Date())}.json`; a.click();
@@ -701,9 +702,9 @@ function confirmClearAll(){
   if(!confirm('¿Seguro? Haz antes una copia de seguridad.'))return;
   records=[];selectedIds.clear();
   localStorage.setItem('caiba_records',JSON.stringify(records));
-  updateSelectBar();renderList();toast('️ Todo borrado');
+  updateSelectBar();renderList();toast('🗑️ Todo borrado');
 }
-function showAbout(){alert('CAIBA Alcolea · Equipo 5\nVersión 4.0 - PWA\n\nSelección múltiple de fotos desde galería.\nDesarrollado para uso interno.');}
+function showAbout(){alert('CAIBA Alcolea · Equipo 5\nVersión 5.0 - PWA\n\nPDF muestra todas las fotos en cuadrícula.\nDesarrollado para uso interno.');}
 function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2400);
