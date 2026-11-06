@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#0f0f0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CAIBA E5">
+<meta name="apple-mobile-web-app-title" content="CAIBA">
 <meta name="mobile-web-app-capable" content="yes">
-<title>CAIBA Alcolea · Equipo 5</title>
+<title>CAIBA Alcolea</title>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f0f0f'/><text x='50' y='68' font-size='48' text-anchor='middle' fill='%234ade80' font-family='Arial' font-weight='bold'>E5</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f0f0f'/><text x='50' y='68' font-size='48' text-anchor='middle' fill='%234ade80' font-family='Arial' font-weight='bold'>E5</text></svg>">
 
-<link rel="manifest" href='data:application/manifest+json,{"name":"CAIBA Equipo 5 - Planta Alcolea","short_name":"CAIBA E5","description":"Registro de trabajos de mantenimiento","start_url":"./","display":"standalone","orientation":"portrait","background_color":"%230f0f0f","theme_color":"%230f0f0f","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f0f0f%27/><text x=%2750%27 y=%2768%27 font-size=%2748%27 text-anchor=%27middle%27 fill=%27%234ade80%27 font-family=%27Arial%27 font-weight=%27bold%27>E5</text></svg>","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
+<link rel="manifest" href='data:application/manifest+json,{"name":"CAIBA Alcolea","short_name":"CAIBA","description":"Registro de trabajos de mantenimiento","start_url":"./","display":"standalone","orientation":"portrait","background_color":"%230f0f0f","theme_color":"%230f0f0f","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f0f0f%27/><text x=%2750%27 y=%2768%27 font-size=%2748%27 text-anchor=%27middle%27 fill=%27%234ade80%27 font-family=%27Arial%27 font-weight=%27bold%27>E5</text></svg>","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -71,6 +71,7 @@
   .record-date{font-size:12px;color:var(--muted);margin-left:auto}
   .record-machine{font-size:15px;font-weight:600;margin:4px 0}
   .record-shift{font-size:13px;color:var(--muted)}
+  .record-team{display:inline-block;background:#2a2a2a;color:#4ade80;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600;margin-right:6px}
   .checkbox{width:22px;height:22px;min-width:22px;border:2px solid #555;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000}
   .record.selected .checkbox{background:var(--accent);border-color:var(--accent)}
   .empty{text-align:center;padding:40px 20px;color:var(--muted)}
@@ -114,7 +115,7 @@
 <body>
 
 <header>
-  <h1>CAIBA <span>· Alcolea · Equipo 5</span></h1>
+  <h1>CAIBA <span>· Alcolea</span></h1>
   <button class="icon-btn" onclick="toggleMenu()">☰</button>
   <div class="menu" id="menu">
     <div class="menu-item" onclick="exportBackup()">💾 Copia de seguridad</div>
@@ -128,7 +129,7 @@
 <main>
 
 <div class="view active" id="viewList">
-  <input type="text" class="search" id="searchInput" placeholder="🔍 Buscar por máquina, fecha, turno..." oninput="renderList(this.value)">
+  <input type="text" class="search" id="searchInput" placeholder="🔍 Buscar por máquina, fecha, turno, equipo..." oninput="renderList(this.value)">
 
   <div class="list-tools">
     <button class="tool-btn" id="selectModeBtn" onclick="toggleSelectMode()">☑️ Seleccionar</button>
@@ -137,6 +138,11 @@
 
   <div class="filters" id="filtersPanel">
     <label>Seleccionar trabajos de...</label>
+    <select id="filterTeam">
+      <option value="">Todos los equipos</option>
+      <option>Equipo 1</option><option>Equipo 2</option><option>Equipo 3</option>
+      <option>Equipo 4</option><option>Equipo 5</option>
+    </select>
     <select id="filterMachine"><option value="">Todas las máquinas</option></select>
     <select id="filterShift">
       <option value="">Todos los turnos</option>
@@ -165,6 +171,16 @@
       <option value="Mantenimiento">Mantenimiento</option>
       <option value="Limpieza">Limpieza</option>
       <option value="Reparación">Reparación</option>
+    </select>
+
+    <label>Equipo</label>
+    <select id="fTeam">
+      <option value="">-- Selecciona equipo --</option>
+      <option>Equipo 1</option>
+      <option>Equipo 2</option>
+      <option>Equipo 3</option>
+      <option>Equipo 4</option>
+      <option>Equipo 5</option>
     </select>
 
     <label>Máquina / Equipo</label>
@@ -241,6 +257,8 @@ let records = JSON.parse(localStorage.getItem('caiba_records') || '[]');
 let currentPhotos = {before:[], after:[]};
 let editingId = null;
 let deferredPrompt = null;
+
+const TEAMS = ['Equipo 1','Equipo 2','Equipo 3','Equipo 4','Equipo 5'];
 
 function handleMachineChange(){
   const sel = document.getElementById('fMachine');
@@ -341,13 +359,14 @@ function fillMachineFilter(){
 }
 
 function selectByFilters(){
+  const t = document.getElementById('filterTeam').value;
   const m = document.getElementById('filterMachine').value;
   const s = document.getElementById('filterShift').value;
-  const t = document.getElementById('filterType').value;
+  const ty = document.getElementById('filterType').value;
   const weekOnly = document.getElementById('filterWeek').checked;
   const w = weekDates();
   const match = records.filter(r =>
-    (!m || r.machine===m) && (!s || r.shift===s) && (!t || r.type===t) &&
+    (!t || r.team===t) && (!m || r.machine===m) && (!s || r.shift===s) && (!ty || r.type===ty) &&
     (!weekOnly || (r.date>=w.from && r.date<=w.to))
   );
   if(match.length===0){ toast('No hay trabajos que coincidan'); return; }
@@ -396,6 +415,7 @@ function openForm(id=null){
   if(id){
     const r=records.find(x=>x.id===id);
     document.getElementById('fType').value=r.type;
+    document.getElementById('fTeam').value = r.team || '';
     setMachineValue(r.machine);
     document.getElementById('fDate').value=r.date;
     document.getElementById('fShift').value=r.shift;
@@ -404,6 +424,7 @@ function openForm(id=null){
     currentPhotos.after = Array.isArray(r.photoAfter) ? r.photoAfter : (r.photoAfter ? [r.photoAfter] : []);
   } else {
     document.getElementById('fType').value='Mantenimiento';
+    document.getElementById('fTeam').value='Equipo 5';
     setMachineValue('');
     document.getElementById('fDate').value=localISO(new Date());
     document.getElementById('fShift').value='Mañana';
@@ -415,7 +436,6 @@ function openForm(id=null){
 function loadPhotos(e,which){
   const files = e.target.files;
   if(!files.length) return;
-  
   Array.from(files).forEach(file => {
     const reader = new FileReader();
     reader.onload = ev => {
@@ -456,10 +476,13 @@ function removePhoto(which, idx){
 
 function saveRecord(){
   const machine = getMachineValue();
+  const team = document.getElementById('fTeam').value;
   if(!machine){toast('⚠️ Selecciona o escribe la máquina');return;}
+  if(!team){toast('⚠️ Selecciona el equipo');return;}
   const data={
     id:editingId||Date.now(),
     type:document.getElementById('fType').value,
+    team,
     machine,
     date:document.getElementById('fDate').value,
     shift:document.getElementById('fShift').value,
@@ -476,7 +499,8 @@ function saveRecord(){
 function getFiltered(){
   const f=document.getElementById('searchInput').value.toLowerCase();
   return records.filter(r=>!f || r.machine.toLowerCase().includes(f) || r.date.includes(f) ||
-    r.shift.toLowerCase().includes(f) || r.type.toLowerCase().includes(f) || (r.notes||'').toLowerCase().includes(f));
+    r.shift.toLowerCase().includes(f) || r.type.toLowerCase().includes(f) || 
+    (r.team||'').toLowerCase().includes(f) || (r.notes||'').toLowerCase().includes(f));
 }
 function renderList(filter=''){
   const list=document.getElementById('recordsList');
@@ -487,6 +511,7 @@ function renderList(filter=''){
   }
   list.innerHTML=filtered.map(r=>{
     const photoCount = (Array.isArray(r.photoBefore)?r.photoBefore.length:r.photoBefore?1:0) + (Array.isArray(r.photoAfter)?r.photoAfter.length:r.photoAfter?1:0);
+    const teamBadge = r.team ? `<span class="record-team">${r.team}</span>` : '';
     return `
     <div class="record ${selectedIds.has(r.id)?'selected':''}" onclick="${selectMode?`toggleSelection(${r.id})`:`showDetail(${r.id})`}">
       <div class="record-head">
@@ -494,7 +519,7 @@ function renderList(filter=''){
         <span class="record-type type-${r.type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}">${r.type}</span>
         <span class="record-date">${formatDate(r.date)}</span>
       </div>
-      <div class="record-machine">${escapeHtml(r.machine)}</div>
+      <div class="record-machine">${teamBadge}${escapeHtml(r.machine)}</div>
       <div class="record-shift">Turno ${r.shift} ${photoCount>0?`· 📷 ${photoCount}`:''}</div>
     </div>`;
   }).join('');
@@ -512,10 +537,10 @@ function showDetail(id){
   document.getElementById('detailContent').innerHTML=`
     <div class="modal-head"><h2>Trabajo #${String(r.id).slice(-4)}</h2><button class="close-btn" onclick="closeModal()">×</button></div>
     <span class="record-type type-${r.type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}" style="margin-bottom:12px;display:inline-block">${r.type}</span>
+    <div class="detail-row"><span class="detail-label">Equipo</span><span class="detail-value">${r.team || 'No especificado'}</span></div>
     <div class="detail-row"><span class="detail-label">Máquina</span><span class="detail-value">${escapeHtml(r.machine)}</span></div>
     <div class="detail-row"><span class="detail-label">Fecha</span><span class="detail-value">${formatDate(r.date)}</span></div>
     <div class="detail-row"><span class="detail-label">Turno</span><span class="detail-value">${r.shift}</span></div>
-    <div class="detail-row"><span class="detail-label">Equipo</span><span class="detail-value">Equipo 5</span></div>
     ${r.notes?`<div class="detail-row" style="flex-direction:column"><span class="detail-label">Incidencias</span><span class="detail-value" style="text-align:left;max-width:100%;margin-top:6px">${escapeHtml(r.notes)}</span></div>`:''}
     ${photos}
     <button class="btn btn-primary" onclick="exportSinglePDF(${r.id})">📄 Exportar PDF individual</button>
@@ -566,7 +591,8 @@ async function buildPDF(list, filename){
     const title=`${String(idx+1).padStart(2,'0')}. ${r.type.toUpperCase()}  -  ${formatDate(r.date)}`;
     doc.text(title,20,y); y+=7;
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(70,70,70);
-    const meta=`Maquina: ${r.machine}   |   Turno: ${r.shift}   |   Equipo 5`;
+    const team = r.team || 'No especificado';
+    const meta=`Equipo: ${team}   |   Maquina: ${r.machine}   |   Turno: ${r.shift}`;
     flowText(meta,10,[70,70,70]); y+=2;
     if(r.notes){
       doc.setFontSize(8); doc.setTextColor(130,130,130);
@@ -585,52 +611,30 @@ async function buildPDF(list, filename){
       if(photosBefore.length > 0){
         doc.setFontSize(8); doc.setTextColor(130,130,130);
         ensure(14); doc.text('ANTES',14,y); y+=4;
-        
         for(let i=0; i<photosBefore.length; i++){
-          const row = Math.floor(i / cols);
           const col = i % cols;
           const xPos = 14 + col * 94;
-          
           if(col === 0 && i > 0) ensure(rowH);
           if(y + boxH > BOTTOM) newPage();
-          
-          try{
-            const im = await loadImg(photosBefore[i]);
-            drawFitted(doc,im,xPos,y,boxW,boxH);
-          }catch(e){console.warn('Error foto',e);}
-          
-          if(col === cols - 1 || i === photosBefore.length - 1){
-            y += rowH;
-          }
+          try{ const im = await loadImg(photosBefore[i]); drawFitted(doc,im,xPos,y,boxW,boxH); }catch(e){}
+          if(col === cols - 1 || i === photosBefore.length - 1) y += rowH;
         }
         y += 4;
       }
-      
       if(photosAfter.length > 0){
         doc.setFontSize(8); doc.setTextColor(130,130,130);
         ensure(14); doc.text('DESPUES',14,y); y+=4;
-        
         for(let i=0; i<photosAfter.length; i++){
-          const row = Math.floor(i / cols);
           const col = i % cols;
           const xPos = 14 + col * 94;
-          
           if(col === 0 && i > 0) ensure(rowH);
           if(y + boxH > BOTTOM) newPage();
-          
-          try{
-            const im = await loadImg(photosAfter[i]);
-            drawFitted(doc,im,xPos,y,boxW,boxH);
-          }catch(e){console.warn('Error foto',e);}
-          
-          if(col === cols - 1 || i === photosAfter.length - 1){
-            y += rowH;
-          }
+          try{ const im = await loadImg(photosAfter[i]); drawFitted(doc,im,xPos,y,boxW,boxH); }catch(e){}
+          if(col === cols - 1 || i === photosAfter.length - 1) y += rowH;
         }
         y += 4;
       }
     }
-    
     ensure(10);
     doc.setDrawColor(220,220,220); doc.setLineWidth(0.3);
     doc.line(14,y+2,196,y+2); y+=9;
@@ -643,7 +647,7 @@ async function buildPDF(list, filename){
     doc.setTextColor(74,222,128); doc.setFont('helvetica','bold'); doc.setFontSize(12);
     doc.text('CAIBA · Planta de Alcolea',14,12);
     doc.setTextColor(220,220,220); doc.setFont('helvetica','normal'); doc.setFontSize(10);
-    doc.text('INFORME DE TRABAJOS · EQUIPO 5',196,12,{align:'right'});
+    doc.text('INFORME DE TRABAJOS',196,12,{align:'right'});
     doc.setFontSize(8); doc.setTextColor(150,150,150);
     doc.text(`Generado: ${new Date().toLocaleString('es-ES')}   ·   ${list.length} trabajos`,14,290);
     doc.text(`Pagina ${i} de ${pages}`,196,290,{align:'right'});
@@ -659,7 +663,7 @@ async function generateMultiplePDF(){
   btn.disabled=true; btn.textContent='⏳ Generando...';
   try{
     const first=list[0].date, last=list[list.length-1].date;
-    const name=`CAIBA_Equipo5_Informe_${first}_a_${last}.pdf`;
+    const name=`CAIBA_Informe_${first}_a_${last}.pdf`;
     await buildPDF(list,name);
     toast(`✅ PDF creado: ${list.length} trabajos`);
   }catch(e){console.error(e);toast('❌ Error al generar el PDF');}
@@ -668,12 +672,12 @@ async function generateMultiplePDF(){
 
 async function exportSinglePDF(id){
   const r=records.find(x=>x.id===id); if(!r)return;
-  try{ await buildPDF([r],`CAIBA_Equipo5_${r.type}_${r.machine.replace(/\s+/g,'_')}_${r.date}.pdf`); toast('📄 PDF generado'); }
+  try{ await buildPDF([r],`CAIBA_${r.type}_${r.machine.replace(/\s+/g,'_')}_${r.date}.pdf`); toast('📄 PDF generado'); }
   catch(e){toast('❌ Error al generar el PDF');}
 }
 
 function exportBackup(){
-  const data={app:'CAIBA Alcolea - Equipo 5',version:5,exportedAt:new Date().toISOString(),records};
+  const data={app:'CAIBA Alcolea',version:6,exportedAt:new Date().toISOString(),records};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob), a=document.createElement('a');
   a.href=url; a.download=`CAIBA_backup_${localISO(new Date())}.json`; a.click();
@@ -704,7 +708,7 @@ function confirmClearAll(){
   localStorage.setItem('caiba_records',JSON.stringify(records));
   updateSelectBar();renderList();toast('🗑️ Todo borrado');
 }
-function showAbout(){alert('CAIBA Alcolea · Equipo 5\nVersión 5.0 - PWA\n\nPDF muestra todas las fotos en cuadrícula.\nDesarrollado para uso interno.');}
+function showAbout(){alert('CAIBA Alcolea\nVersión 6.0 - PWA\n\nSelección de equipo (1-5) en cada informe.\nDesarrollado para uso interno.');}
 function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2400);
